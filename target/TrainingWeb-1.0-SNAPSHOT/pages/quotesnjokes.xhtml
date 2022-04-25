@@ -1,0 +1,143 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="base.xhtml">
+    <ui:define name="content">
+        <h:head>
+            <title>PuiP</title>
+        </h:head>
+        <h:body>
+            <p:importEnum type="com.example.TrainingWeb.business.quotesnjokes.Language" var="Language"
+                          allSuffix="ALL_LANGUAGE_VALUES"/>
+            <p:importEnum type="com.example.TrainingWeb.business.quotesnjokes.Type" var="Type"
+                          allSuffix="ALL_TYPE_VALUES"/>
+
+            <p:growl id="msgs" showDetail="true"/>
+            <p:spacer/>
+            <h1 style="text-align: center">Quotes &amp; Jokes</h1>
+
+            <h:form id="form" prependId="false">
+                <div class="globalLanguageSelectHolder">
+                    <p:selectOneButton value="#{quotesNJokesGUI.quoteNJoke.language}" unselectable="false"
+                                       styleClass="globalLanguageSelect" autoWidth="false">
+                        <f:selectItem itemLabel="English" itemValue="#{Language.ENGLISH}"/>
+                        <f:selectItem itemLabel="German" itemValue="#{Language.GERMAN}"/>
+                    </p:selectOneButton>
+                </div>
+                <p:spacer height="100"/>
+                <div class="d-flex justify-content-center">
+                    <div class="">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p:commandButton id="showJoke" type="submit" icon="pi pi-android btnIcon"
+                                                 oncomplete="PF('quoteNJokeDialog').show()"
+                                                 update=":quoteNJokeDialogPanel :iconPanel"
+                                                 styleClass="showJoke"
+                                                 actionListener="#{quotesNJokesGUI.showRandomJoke()}"/>
+                            </div>
+                        </div>
+                        <p:spacer/>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p:commandButton id="showQuote" type="submit" icon="pi pi-thumbs-up btnIcon"
+                                                 oncomplete="PF('quoteNJokeDialog').show()"
+                                                 update=":quoteNJokeDialogPanel :iconPanel"
+                                                 styleClass="showJoke"
+                                                 actionListener="#{quotesNJokesGUI.showRandomQuote()}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </h:form>
+
+            <h:form id="insertForm" prependId="false">
+                <div class="d-flex p-2">
+                    <p:accordionPanel widgetVar="accordion" styleClass="accordion" activeIndex="null">
+                        <p:tab title="Insert Data">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <p:selectOneButton value="#{quotesNJokesGUI.quoteNJoke.language}"
+                                                       unselectable="false"
+                                                       styleClass="languageSelect" autoWidth="false">
+                                        <f:selectItem itemLabel="English" itemValue="#{Language.ENGLISH}"/>
+                                        <f:selectItem itemLabel="German" itemValue="#{Language.GERMAN}"/>
+                                    </p:selectOneButton>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <p:inputText id="newQuoteNJoke" styleClass="inputQuoteNJoke"
+                                                 value="#{quotesNJokesGUI.quoteNJoke.text}"
+                                                 placeholder="New Entry..."/>
+                                </div>
+                                <div class="col-auto">
+                                    <p:commandButton id="submitButton" type="submit" value="Save"
+                                                     update="@form :msgs"
+                                                     styleClass="submitButton" style="float:left"
+                                                     actionListener="#{quotesNJokesGUI.insertQuoteNJoke()}"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <p:selectOneButton value="#{quotesNJokesGUI.quoteNJoke.type}" unselectable="false"
+                                                       styleClass="typeSelect" autoWidth="false">
+                                        <f:selectItem itemLabel="Joke" itemValue="#{Type.JOKE}"/>
+                                        <f:selectItem itemLabel="Quote" itemValue="#{Type.QUOTE}"/>
+                                    </p:selectOneButton>
+                                </div>
+                            </div>
+                            <p:spacer/>
+
+                            <p:dataTable value="#{quotesNJokesGUI.quoteNJokes}" var="quoteNJoke" id="quotesNJokesTable"
+                                         widgetVar="quotesNJokesTable" rowStyleClass="#{quotesNJokesGUI.getRowStyleClass(quoteNJoke)}"
+                                         scrollable="true" scrollHeight="350" style="width:100%;" styleClass="mystyle">
+                                <f:facet name="header">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <p:selectManyButton value="#{quotesNJokesGUI.languageFilterOptions}"
+                                                                styleClass="filtersLanguage">
+                                                <p:ajax event="change" update="quotesNJokesTable" listener="#{quotesNJokesGUI.filterTable}"/>
+                                                <f:selectItem itemLabel="German" itemValue="GERMAN"/>
+                                                <f:selectItem itemLabel="English" itemValue="ENGLISH"/>
+                                            </p:selectManyButton>
+                                            <p:selectManyButton value="#{quotesNJokesGUI.typeFilterOptions}"
+                                                                styleClass="filtersType">
+                                                <p:ajax event="change" update="quotesNJokesTable" listener="#{quotesNJokesGUI.filterTable}"/>
+                                                <f:selectItem itemLabel="Joke" itemValue="JOKE"/>
+                                                <f:selectItem itemLabel="Quote" itemValue="QUOTE"/>
+                                            </p:selectManyButton>
+                                        </div>
+                                    </div>
+
+                                </f:facet>
+
+                                <p:column>
+                                    <h:outputText value="#{quoteNJoke.text}"/>
+                                </p:column>
+                            </p:dataTable>
+                        </p:tab>
+                    </p:accordionPanel>
+                </div>
+            </h:form>
+
+
+            <p:dialog widgetVar="quoteNJokeDialog" id="quoteNJokeDialog" width="1600" height="800"
+                      styleClass="dialog-no-header" fitViewport="true" responsive="true" draggable="false"
+                      blockScroll="true"
+                      showEffect="fade" hideEffect="fade" closeOnEscape="true" modal="true">
+                <p:outputPanel id="iconPanel" style="position: absolute">
+                    <i class="#{quotesNJokesGUI.icon}" style="font-size: 2rem; color:white; margin-top: 20px;"></i>
+                </p:outputPanel>
+
+                <p:outputPanel id="quoteNJokeDialogPanel" style="text-align:center;" styleClass="quoteNJokeDialogPanel">
+                    <h:outputText id="quoteNJokeOutput" value="#{quotesNJokesGUI.newQuoteNJokeText}" escape="false"
+                                  styleClass="quoteNJoke"/>
+                </p:outputPanel>
+                <p style="color: white; position: absolute">Press ESC to close...</p>
+            </p:dialog>
+            <link href="../resources/css/quotesnjokes.css" rel="stylesheet" type="text/css"/>
+        </h:body>
+    </ui:define>
+
+</ui:composition>

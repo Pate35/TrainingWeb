@@ -1,0 +1,42 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="base.xhtml">
+    <ui:define name="content">
+        <h:head>
+            <title>PuiP</title>
+        </h:head>
+        <h:body>
+            <p:growl id="msgs" showDetail="true"/>
+            <p:spacer/>
+            <h1 style="text-align: center">Welcome to Pui's Platform</h1>
+            <p:spacer/>
+
+            <h:form id="form" prependId="false">
+                <div class="container">
+                    <div class="card">
+                        <p:panel header="AuditTrail">
+                            <p:dataTable var="entry" value="#{homeGUI.entries}"
+                                         scrollHeight="400" scrollable="true" styleClass="mystyle">
+                                <p:column headerText="Date">
+                                    <h:outputText value="#{entry.date}">
+                                        <f:attribute name="pattern" value="dd.MM.yyyy HH:mm:ss"/>
+                                    </h:outputText>
+                                </p:column>
+
+                                <p:column headerText="Entry">
+                                    <h:outputText value="#{entry.entry}" />
+                                </p:column>
+                            </p:dataTable>
+                        </p:panel>
+                    </div>
+                </div>
+
+            </h:form>
+            <link href="../resources/css/index.css" rel="stylesheet" type="text/css"/>
+        </h:body>
+    </ui:define>
+
+</ui:composition>

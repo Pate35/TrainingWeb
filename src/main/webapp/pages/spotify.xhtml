@@ -1,0 +1,30 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="base.xhtml">
+    <ui:define name="content">
+        <h:head>
+            <title>PuiP</title>
+            <f:metadata>
+                <f:viewParam name="authorizationCode" value="#{spotifyGUI.code}" />
+            </f:metadata>
+        </h:head>
+        <h:body>
+            <p:growl id="msgs" showDetail="true"/>
+            <p:spacer/>
+            <h1 style="text-align: center">Spotify</h1>
+
+            <h:form id="form" prependId="false">
+                <p>Logged in as: #{spotifyGUI.user}</p>
+                <p:commandButton value="loginSpotify" action="#{spotifyGUI.login()}" />
+            </h:form>
+
+
+
+            <link href="../resources/css/spotify.css" rel="stylesheet" type="text/css"/>
+        </h:body>
+    </ui:define>
+
+</ui:composition>

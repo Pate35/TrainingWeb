@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+/*index Page*/
+body {
+    background-color: #6d6161;
+    color: white;
+    font-family: Roboto, monospace;
+}
+
+/*removing horizontal scrollbar from datatable*/
+.mystyle.ui-datatable .ui-datatable-scrollable-body{
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+}
