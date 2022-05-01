@@ -107,6 +107,13 @@ public class RenegadeGUI implements Serializable {
         }
     }
 
+    private int getEnemyPiece(int piece) {
+        if (piece == Piece.BLACK) {
+            return Piece.WHITE;
+        }
+        return Piece.BLACK;
+    }
+
     public void insertWhitePiece(int x, int y) {
         currentX = x;
         currentY = y;
@@ -143,16 +150,10 @@ public class RenegadeGUI implements Serializable {
     }
 
     private void checkWhiteCapturingMove() {
-        setNextNumbers(currentX, currentY);
-        setPreviousNumbers(currentX, currentY);
-
-        if (isPerpendicular(Piece.BLACK) || isDiagonal(Piece.BLACK)) {
-
-            setNextNumbers(nextX, nextY);
-            setPreviousNumbers(previousX, previousY);
-
-            checkDeepWhiteCapturingMove();
-        }
+        setNextAndPreviousNumbers();
+        checkPerpendicularLines(Piece.BLACK);
+        setNextAndPreviousNumbers();
+        checkDiagonalLines(Piece.BLACK);
 
         if (captures == 0) {
             MessageHelper.addErrorMessage("Placed piece is not capturing another piece! Placed at: [" + currentX + "," + currentY + "]");
@@ -161,17 +162,10 @@ public class RenegadeGUI implements Serializable {
     }
 
     private void checkBlackCapturingMove() {
-
-        setNextNumbers(currentX, currentY);
-        setPreviousNumbers(currentX, currentY);
-
-        if (isPerpendicular(Piece.WHITE) || isDiagonal(Piece.WHITE)) {
-
-            setNextNumbers(nextX, nextY);
-            setPreviousNumbers(previousX, previousY);
-
-            checkDeepBlackCapturingMove();
-        }
+        setNextAndPreviousNumbers();
+        checkPerpendicularLines(Piece.WHITE);
+        setNextAndPreviousNumbers();
+        checkDiagonalLines(Piece.WHITE);
 
         if (captures == 0) {
             MessageHelper.addErrorMessage("Placed piece is not capturing another piece! Placed at: [" + currentX + "," + currentY + "]");
@@ -179,30 +173,61 @@ public class RenegadeGUI implements Serializable {
         }
     }
 
-    private void checkDeepWhiteCapturingMove() {
-        checkCapturable(Piece.WHITE);
+    private void setNextAndPreviousNumbers() {
+        setNextNumbers(currentX, currentY);
+        setPreviousNumbers(currentX, currentY);
+    }
 
-        if (isPerpendicular(Piece.BLACK) || isDiagonal(Piece.BLACK)) {
+    private void checkPerpendicularLines(int piece) {
+        if (isPerpendicular(piece)) {
+
             setNextNumbers(nextX, nextY);
             setPreviousNumbers(previousX, previousY);
-            checkDeepWhiteCapturingMove();
+
+            checkDeepCapturingMovePerpendicular(piece);
+        }
+    }
+
+    private void checkDiagonalLines(int piece) {
+        if (isDiagonal(piece)) {
+
+            setNextNumbers(nextX, nextY);
+            setPreviousNumbers(previousX, previousY);
+
+            checkDeepCapturingMoveDiagonal(piece);
+        }
+    }
+
+    private void checkDeepCapturingMovePerpendicular(int piece) {
+        checkCapturablePerpendicular(getEnemyPiece(piece));
+
+        if (isPerpendicular(Piece.WHITE)) {
+            setNextNumbers(nextX, nextY);
+            setPreviousNumbers(previousX, previousY);
+            checkDeepCapturingMovePerpendicular(piece);
+        }
+    }
+
+    private void checkDeepCapturingMoveDiagonal(int piece) {
+        checkCapturableDiagonal(getEnemyPiece(piece));
+
+        if (isDiagonal(Piece.WHITE)) {
+            setNextNumbers(nextX, nextY);
+            setPreviousNumbers(previousX, previousY);
+            checkDeepCapturingMoveDiagonal(piece);
         }
     }
 
 
-    private void checkDeepBlackCapturingMove() {
-        checkCapturable(Piece.BLACK);
-
-        if (isPerpendicular(Piece.WHITE) || isDiagonal(Piece.WHITE)) {
-            setNextNumbers(nextX, nextY);
-            setPreviousNumbers(previousX, previousY);
-            checkDeepBlackCapturingMove();
+    private void checkCapturablePerpendicular(int piece) {
+        if (isPerpendicular(piece)) {
+            capturePieces(piece);
+            captures++;
         }
     }
 
-
-    private void checkCapturable(int piece) {
-        if (isPerpendicular(piece) || isDiagonal(piece)) {
+    private void checkCapturableDiagonal(int piece) {
+        if (isDiagonal(piece)) {
             capturePieces(piece);
             captures++;
         }
