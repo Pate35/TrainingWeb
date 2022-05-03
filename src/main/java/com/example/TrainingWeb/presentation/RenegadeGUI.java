@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Named
 @ViewScoped
@@ -38,6 +39,7 @@ public class RenegadeGUI implements Serializable {
     private int previousY;
 
     @Getter
+    @Setter
     private int turn;
 
     @Getter
@@ -201,7 +203,7 @@ public class RenegadeGUI implements Serializable {
     private void checkDeepCapturingMovePerpendicular(int piece) {
         checkCapturablePerpendicular(getEnemyPiece(piece));
 
-        if (isPerpendicular(Piece.WHITE)) {
+        if (isPerpendicular(piece)) {
             setNextNumbers(nextX, nextY);
             setPreviousNumbers(previousX, previousY);
             checkDeepCapturingMovePerpendicular(piece);
@@ -211,31 +213,34 @@ public class RenegadeGUI implements Serializable {
     private void checkDeepCapturingMoveDiagonal(int piece) {
         checkCapturableDiagonal(getEnemyPiece(piece));
 
-        if (isDiagonal(Piece.WHITE)) {
+        if (isDiagonal(piece)) {
             setNextNumbers(nextX, nextY);
             setPreviousNumbers(previousX, previousY);
             checkDeepCapturingMoveDiagonal(piece);
         }
     }
 
-
     private void checkCapturablePerpendicular(int piece) {
         if (isPerpendicular(piece)) {
-            capturePieces(piece);
-            captures++;
+            capturePiecesPerpendicular(piece);
         }
     }
 
     private void checkCapturableDiagonal(int piece) {
         if (isDiagonal(piece)) {
-            capturePieces(piece);
-            captures++;
+            capturePiecesDiagonal(piece);
         }
     }
 
-    private void capturePieces(int capturingPiece) {
-        addToTurnablePieces(capturingPiece);
+    private void capturePiecesPerpendicular(int capturingPiece) {
+        addToTurnablePiecesPerpendicular(capturingPiece);
+    }
 
+    private void capturePiecesDiagonal(int capturingPiece) {
+        addToTurnablePiecesDiagonal(capturingPiece);
+    }
+
+    private void turnPieces(int capturingPiece) {
         for (UIPiece piece : turnablePieces) {
             for (int row = 0; row < 8; row++) {
                 for (int col = 0; col < 8; col++) {
@@ -247,10 +252,9 @@ public class RenegadeGUI implements Serializable {
         }
     }
 
-    private void addToTurnablePieces(int capturingPiece) {
+    private void addToTurnablePiecesPerpendicular(int capturingPiece) {
         List<UIPiece> tempTurnablePieces = new ArrayList<>();
         // check if same colour is in between so it shouldnt be capturable
-
         if (board[currentY][nextX].getPiece() == capturingPiece) {
             for (int i = nextX; i > currentX; i--) {
                 if (board[currentY][i].getPiece() == 0) {
@@ -259,7 +263,7 @@ public class RenegadeGUI implements Serializable {
                     tempTurnablePieces.add(board[currentY][i]);
                 }
             }
-            turnablePieces.addAll(tempTurnablePieces);
+            checkEnemyCaptureAndAddToTurnablePieces(capturingPiece, tempTurnablePieces);
             tempTurnablePieces.clear();
         }
 
@@ -272,7 +276,7 @@ public class RenegadeGUI implements Serializable {
                     tempTurnablePieces.add(board[currentY][i]);
                 }
             }
-            turnablePieces.addAll(tempTurnablePieces);
+            checkEnemyCaptureAndAddToTurnablePieces(capturingPiece, tempTurnablePieces);
             tempTurnablePieces.clear();
         }
 
@@ -285,7 +289,7 @@ public class RenegadeGUI implements Serializable {
                     tempTurnablePieces.add(board[i][currentX]);
                 }
             }
-            turnablePieces.addAll(tempTurnablePieces);
+            checkEnemyCaptureAndAddToTurnablePieces(capturingPiece, tempTurnablePieces);
             tempTurnablePieces.clear();
         }
 
@@ -298,9 +302,20 @@ public class RenegadeGUI implements Serializable {
                     tempTurnablePieces.add(board[i][currentX]);
                 }
             }
-            turnablePieces.addAll(tempTurnablePieces);
+            checkEnemyCaptureAndAddToTurnablePieces(capturingPiece, tempTurnablePieces);
             tempTurnablePieces.clear();
         }
+
+        turnPiecesAndIncreaseCaptures(capturingPiece);
+    }
+
+    private void checkEnemyCaptureAndAddToTurnablePieces(int capturingPiece, List<UIPiece> tempTurnablePieces) {
+        tempTurnablePieces = checkIfCapturesEnemyPiece(tempTurnablePieces, getEnemyPiece(capturingPiece));
+        turnablePieces.addAll(tempTurnablePieces);
+    }
+
+    private void addToTurnablePiecesDiagonal(int capturingPiece) {
+        List<UIPiece> tempTurnablePieces = new ArrayList<>();
 
         if (board[previousY][previousX].getPiece() == capturingPiece) {
             tempTurnablePieces.clear();
@@ -322,7 +337,7 @@ public class RenegadeGUI implements Serializable {
                     }
                 }
             }
-            turnablePieces.addAll(tempTurnablePieces);
+            checkEnemyCaptureAndAddToTurnablePieces(capturingPiece, tempTurnablePieces);
             tempTurnablePieces.clear();
         }
 
@@ -340,7 +355,7 @@ public class RenegadeGUI implements Serializable {
                     }
                 }
             }
-            turnablePieces.addAll(tempTurnablePieces);
+            checkEnemyCaptureAndAddToTurnablePieces(capturingPiece, tempTurnablePieces);
             tempTurnablePieces.clear();
         }
 
@@ -358,7 +373,7 @@ public class RenegadeGUI implements Serializable {
                     }
                 }
             }
-            turnablePieces.addAll(tempTurnablePieces);
+            checkEnemyCaptureAndAddToTurnablePieces(capturingPiece, tempTurnablePieces);
             tempTurnablePieces.clear();
         }
 
@@ -382,13 +397,24 @@ public class RenegadeGUI implements Serializable {
                     }
                 }
             }
-            turnablePieces.addAll(tempTurnablePieces);
+            checkEnemyCaptureAndAddToTurnablePieces(capturingPiece, tempTurnablePieces);
             tempTurnablePieces.clear();
         }
 
-        if (turnablePieces.isEmpty()) {
-            throw new PieceIsNotCapturingAnythingException(currentX, currentY);
+        turnPiecesAndIncreaseCaptures(capturingPiece);
+    }
+
+    private void turnPiecesAndIncreaseCaptures(int capturingPiece) {
+        if (!turnablePieces.isEmpty()) {
+            turnPieces(capturingPiece);
+            captures++;
         }
+    }
+
+    private List<UIPiece> checkIfCapturesEnemyPiece(List<UIPiece> tempTurnablePieces, int enemyPiece) {
+        return tempTurnablePieces.stream()
+                .filter(piece -> piece.getPiece() == enemyPiece)
+                .collect(Collectors.toList());
     }
 
     private boolean isPerpendicular(int toCapture) {
